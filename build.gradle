@@ -1,0 +1,20 @@
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+
+repositories {
+	mavenLocal()
+	maven {
+		name = 'forge'
+		url = 'http://files.minecraftforge.net/maven'
+	}
+	jcenter()
+	mavenCentral()
+	maven {
+		name = 'sonatype'
+		url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+	}
+}
+dependencies {
+	compile gradleApi()
+	compile 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+}
