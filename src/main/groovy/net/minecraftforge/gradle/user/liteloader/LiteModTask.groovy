@@ -2,42 +2,36 @@ package net.minecraftforge.gradle.user.liteloader
 
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.internal.ClosureBackedAction
-import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.internal.ClosureBackedAction
-
-import java.util.Properties
 
 class LiteModTask extends DefaultTask
 {
 
-    @OutputFile File output = new File(this.temporaryDir, this.fileName)
-    
-    @Lazy String buildNumber = {
-            project.ant.buildnumber()
-            project.ant.antProject.properties['build.number']
-        } ()
+    @OutputFile File output = new File(this.temporaryDir, 'litemod.json')
     
     @Lazy LiteModJson json = {
             def version = project.extensions.minecraft.version
-            new LiteModJson(project, version, buildNumber)
+            new LiteModJson(project, version)
         } ()
     
     
     LiteModTask()
     {
         this.outputs.upToDateWhen { false }
-    }
+        this.doFirst {
+            if (json.revision == null) {
+                project.ant.buildnumber()
+                def buildNumber = project.ant.antProject.properties['build.number']
+                json.revision = buildNumber
+            }
+        }
 
-    @TaskAction
-    void doTask() throws IOException
-    {
-        output.delete()
-        this.json.toJsonFile(output)
+        this.doLast {
+            output.delete()
+            this.json.toJsonFile(output)
+        }
     }
     
     def json(Closure configureClosure)

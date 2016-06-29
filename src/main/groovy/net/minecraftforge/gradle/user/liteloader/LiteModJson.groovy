@@ -35,11 +35,10 @@ class LiteModJson
     private transient final Project project
     private transient final String minecraftVersion
     
-    LiteModJson(Project project, String minecraftVersion, String revision)
+    LiteModJson(Project project, String minecraftVersion)
     {
         this.project = project
         this.mcversion = this.minecraftVersion = minecraftVersion
-        this.revision = revision
         
         this.name = project.name
         this.description = new Description(project.description)
