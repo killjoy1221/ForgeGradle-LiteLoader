@@ -2,6 +2,7 @@ package net.minecraftforge.gradle.user.liteloader
 
 import com.google.gson.*
 import org.gradle.api.*
+import org.gradle.api.internal.ClosureBackedAction
 
 class LiteModJson
 {
@@ -18,10 +19,11 @@ class LiteModJson
         @Override
         String toString()
         {
-            this[Description.BASE] ?: Description.BASE
+            this[BASE] ?: BASE
         }
 
     }
+    static class Metadata extends HashMap<String, Object> {}
     
     String name, displayName, version, author
     String mcversion, revision
@@ -31,6 +33,7 @@ class LiteModJson
     List<String> dependsOn
     List<String> requiredAPIs
     List<String> mixinConfigs
+    Metadata metadata = new Metadata()
     
     private transient final Project project
     private transient final String minecraftVersion
@@ -74,13 +77,24 @@ class LiteModJson
         this.description[Description.BASE] = value
     }
 
+    def metadata(Closure configureClosure)
+    {
+        metadata(new ClosureBackedAction(configureClosure))
+    }
+
+    def metadata(Action<Metadata> action)
+    {
+        action.execute(metadata)
+    }
+
     def toJsonFile(File outputFile) throws IOException
     {
         this.validate()
         outputFile.withWriter {
             new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Description, new JsonAdapter())
+                .registerTypeAdapter(Description, new DescriptionAdapter())
+                .registerTypeAdapter(Metadata, new MetadataAdapter())
                 .create()
                 .toJson(this, it)
         }
